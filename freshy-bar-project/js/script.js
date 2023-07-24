@@ -39,7 +39,64 @@ cocktail.innerHTML = `
                         return cocktail
 }
 
+const modalController = ({ modal, btnOpen, time = 300 }) => {
+ const buttonElem = document.querySelector(btnOpen);
+ const modalElem = document.querySelector(modal);
+
+ modalElem.style.cssText = `
+ display: flex;
+ visibility: hidden;
+ opacity: 0;
+ transition: opacity ${time}ms ease-in-out;
+ `;
+
+
+
+const closeModal = (event) => {
+    const target = event.target;
+    const code = event .code;
+    console.log("code: ", code)
+
+    if ( target === modalElem || code ==="Escape") {
+
+            modalElem.style.opacity = 0;
+
+            setTimeout(() => {
+            modalElem.style.visibility = "hidden";
+            }, time);
+
+        window.removeEventListener("keydown", closeModal);
+    }
+};
+
+const openModal = () => {
+  modalElem.style.visibility = "visible";
+  modalElem.style.opacity = 1;
+  window.addEventListener('keydown', closeModal);
+};
+
+
+buttonElem.addEventListener('click', openModal);
+//console.log("buttonElem: ", buttonElem);
+modalElem.addEventListener('click', closeModal);
+//console.log("modalElem: ", modalElem);
+
+return { openModal, closeModal };
+};
+
+
 const init = async () => {
+    modalController ({
+        modal: '.modal__order', 
+        btnOpen: '.header__btn-order',
+    });
+
+/* // будет написана специальная функция кот будет этим заниматься
+const headerBtnOrder = document.querySelector(".header__btn-order"); мы должны получить эту кнопку 
+headerBtnOrder.addEventListener("click", () => {  далее мы должны на нее кликнуть ., мы вызываем функцию 
+    modal__order
+})  */
+
 const goodsListEitem = document.querySelector(".goods__list");
 //console.log(goodsListEitem);
 //console.log(document);
