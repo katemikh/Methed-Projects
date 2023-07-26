@@ -121,6 +121,11 @@ const init = async () => {
         // time: 500 скорость открытия модального окна 
     });
 
+    modalController({
+        modal: ".modal__make",
+        btnOpen: ".cocktail__btn-make"
+    })
+
 /* // будет написана специальная функция кот будет этим заниматься
 const headerBtnOrder = document.querySelector(".header__btn-order"); мы должны получить эту кнопку 
 headerBtnOrder.addEventListener("click", () => {  далее мы должны на нее кликнуть ., мы вызываем функцию 
