@@ -78,7 +78,7 @@ const scrollService = {
   }
 };
 
-const modalController = ({ modal, btnOpen, time = 300 }) => {
+const modalController = ({ modal, btnOpen, time = 300, open, close }) => {
  const buttonElems = document.querySelectorAll(btnOpen);
  const modalElem = document.querySelector(modal);
 
@@ -104,13 +104,23 @@ const closeModal = (event) => {
         modalElem.style.visibility = "hidden";
         // enabled мы будем вызывать когда модальное окно закрываем
         scrollService.enableScroll();
+
+if (close) {
+  close();
+}
+
       }, time);
 
       window.removeEventListener("keydown", closeModal);
     }
 };
 
-const openModal = () => {
+const openModal = (e) => {
+
+  if(open) {
+    open({btn: e.target});
+  };
+
   modalElem.style.visibility = "visible";
   modalElem.style.opacity = 1;
   window.addEventListener('keydown', closeModal);
@@ -199,6 +209,52 @@ const handlerChange = () => {
  // });
 };
 
+const calculateAdd = () => {
+    const modalAdd = document.querySelector(".modal__add");
+    const formAdd = document.querySelector(".make__form-add");
+
+    const makeTitle = modalAdd.querySelector(".make__title");
+    const makeInputTitel = modalAdd.querySelector(".make__input-title");
+    const makeTotalPrice = modalAdd.querySelector(".make__total-price");
+    const makeInputStartPrice = modalAdd.querySelector(".make__input-start-price");
+    const makeInputPrice = modalAdd.querySelector(".make__input-price");
+    const makeTotalSize = modalAdd.querySelector(".make__total-size");
+    const makeInputSize = modalAdd.querySelector(".make__input-size");
+
+const handlerChange = () => {
+  const totalPrice = calculateTotalPrice(formAdd, +makeInputStartPrice.value);
+  
+  makeInputPrice.value = totalPrice;
+  makeTotalPrice.textContent = `${totalPrice} ₽`;
+}
+
+    formAdd.addEventListener("change", handlerChange);
+
+const fillInForm = (data) => {
+  
+makeTitle.textContent = data.title
+makeInputTitel.value = data.title
+makeTotalPrice.textContent = `${data.price} ₽`;
+makeInputStartPrice.value = data.price;
+makeInputPrice.value = data.price;
+makeTotalSize.textContent = data.size
+makeInputSize.value = data.size
+handlerChange();
+};
+
+const resetForm = () => {
+makeTitle.textContent = "";
+makeTotalPrice.textContent = "";
+makeTotalSize.textContent =  "";
+
+formAdd.reset();
+};
+
+
+
+  return { fillInForm, resetForm };
+};
+
   const init = async () => {
     modalController({
       modal: ".modal__order",
@@ -243,13 +299,21 @@ headerBtnOrder.addEventListener("click", () => {  далее мы должны �
     goodsListEitem.append(...cartsCocktail);
 
 
+    const { fillInForm, resetForm } = calculateAdd();
 
     modalController({
       modal: ".modal__add",
       btnOpen: ".cocktail__btn-add",
+
+      //callback functions кот передаются в тот момент когда будет происходить open и после того, когда будет происходить close
+      open({ btn }) {
+        const id = btn.dataset.id;
+        const item = data.find((item) => item.id.toString() === id);
+        fillInForm(item);
+      },
+
+      close: resetForm,
     });
-
-
   };
 
 init();
