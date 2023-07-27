@@ -109,6 +109,10 @@ ul {
  .hearo {
      padding: 30px 0 85px;
 }
+
+.hero__container {
+    position: relative;
+}
  .hero__title {
      font-size: 84px;
      font-weight: 900;
@@ -546,6 +550,44 @@ background-color: #F6F6F6;
 .radio__input {
 
 }
+
+.decoration {
+    position: absolute;
+    inset:0;
+
+}
+
+.decoration__img {
+    position: absolute;
+    background-position: center;
+    background-size: 100%;
+    background-repeat: no-repeat;
+    
+}
+.decoration__img-1 {
+background-image: url("../img/klubnleft.png");
+width: 223px;
+height: 214px;
+top: 156px;
+left: -103px;
+animation: flying1 2s ease-in-out;
+}
+
+@keyframes flying1 {
+    0% {
+        top: 0px;
+        left: -503px;
+    }
+    50% {
+         top: 200px;
+        left: 200px;
+    }
+    100% {
+top: 156px;
+left: -103px;
+    }
+    
+};
 
 @media (max-width: 1240px) {
     body {
