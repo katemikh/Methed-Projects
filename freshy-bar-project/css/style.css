@@ -77,6 +77,11 @@ ul {
      background-color: #F44;
      box-shadow: 0px 4px 20px 0px #FA5A5A;
 }
+
+.btn:disabled {
+    background-color: #c1c1c1;
+    box-shadow: none;
+}
  .text__red {
      color: #F44;
 }

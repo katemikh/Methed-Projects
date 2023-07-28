@@ -14,6 +14,31 @@ const price = {
   Пластиковый: 0,
 }
 
+const cartDataControl = {
+  get() {
+
+    return JSON.parse(localStorage.getItem("freshyBarCart") || "[]" );
+  },
+add(item) {
+  // console.log("item: ", item);
+const cartData = this.get();
+item.idls = Math.random().toString(36).substring(2, 8);
+cartData.push(item);
+localStorage.setItem("freshyBarCart", JSON.stringify(cartData));
+},
+remove(idls) {
+  const cartData = this.get();
+  const index = cart.findIndex((item) => item.idls === idls);
+  if(index != -1) {
+    cartData.splice(index, 1);
+  }
+  localStorage.setItem("freshyBarCart", JSON.stringify(cartData));  
+},
+clear() {
+  localStorage.removeItem("freshyBarCart");
+},
+};
+
 const getData = async() => {
     //const response = await fetch(API_URL + "api/goods");
     const response = await fetch(`${API_URL}api/goods`);
@@ -96,7 +121,7 @@ const closeModal = (event) => {
     const code = event .code;
     //console.log("code: ", code)
 
-    if ( target === modalElem || code ==="Escape") {
+    if ( event === "close" || target === modalElem || code ==="Escape") {
       modalElem.style.opacity = 0;
 
 
@@ -136,6 +161,9 @@ buttonElems.forEach((buttonElem) => {
 modalElem.addEventListener('click', closeModal);
 //console.log("modalElem: ", modalElem);
 
+modalElem.closeModal = closeModal;
+modalElem.openModal = openModal;
+
 return { openModal, closeModal };
 };
 
@@ -164,7 +192,7 @@ const data = getFormData(form)
 //console.log("data: ", data);
 
 if (Array.isArray(data.ingredients)) {
-  data.ingredients,forEach(item => {
+  data.ingredients.forEach(item => {
     totalPrice += price[item] || 0;
   })
 } else {
@@ -184,29 +212,69 @@ totalPrice += price[data.cup] || 0;
 return totalPrice
 };
 
+const formControl = (form, cb) => {
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
 
-const calculateMakeYourOwn = () => {
-  // будет получать элементы с верстки
-  const formMakeOwn = document.querySelector(".make__form-make-your-own");
-  const makeInputPrice = formMakeOwn.querySelector(".make__input-price");
-  const makeTotalPrice = formMakeOwn.querySelector(".make__total-price");
+      const data = getFormData(form);
+      cartDataControl.add(data);
 
-const handlerChange = () => {
-      const totalPrice = calculateTotalPrice(formMakeOwn, 150);
-      makeInputPrice.value = totalPrice;
-      makeTotalPrice.textContent = `${totalPrice} ₽`; 
+      if (cb) {
+        cb();
+      }
+    });
 };
 
+const calculateMakeYourOwn = () => {
+  const modalMakeOwn = document.querySelector(".modal__make-your-own");
+  // будет получать элементы с верстки 
+  const formMakeOwn = modalMakeOwn.querySelector(".make__form-make-your-own");
+  const makeInputTitle = modalMakeOwn.querySelector(".make__input-title");
+  const makeInputPrice = modalMakeOwn.querySelector(".make__input-price");
+  const makeTotalPrice = modalMakeOwn.querySelector(".make__total-price");
+  const makeAddBtn = modalMakeOwn.querySelector(".make__add-btn");
+
+  const handlerChange = () => {
+    const totalPrice = calculateTotalPrice(formMakeOwn, 150);
+
+    const data = getFormData(formMakeOwn);
+
+    if (data.ingredients) {
+      const ingredients = Array.isArray(data.ingredients)
+        ? data.ingredients.join(", ")
+        : data.ingredients;
+
+      makeInputTitle.value = "Конструктор: ${ingredients}";
+      makeAddBtn.disabled = false;
+    } else {
+      makeAddBtn.disabled = true;
+    }
+    makeInputPrice.value = totalPrice;
+    makeTotalPrice.textContent = `${totalPrice} ₽`;
+  };
 
   formMakeOwn.addEventListener("change", handlerChange);
   // () => {
-    // console.log("test");
-    //будет высчитываться тотал прайс с отдельной функции
-/*     const totalPrice = calculateTotalPrice(formMakeOwn, 150);
+  // console.log("test");
+  //будет высчитываться тотал прайс с отдельной функции
+  /*     const totalPrice = calculateTotalPrice(formMakeOwn, 150);
     makeInputprice.value = totalPrice;
     makeTotalPrice.textContent = `${totalPrice} ₽`;  */
-    handlerChange();
- // });
+  
+  formControl(formMakeOwn, () => {
+    modalMakeOwn.closeModal(close);
+  });
+  handlerChange();
+  // });
+
+  const resetForm = () => {
+    makeTitle.textContent = "";
+    makeTotalPrice.textContent = "";
+    makeAddBtn.disabled = true;
+    formAdd.reset();
+  }
+
+  return {resetForm};
 };
 
 const calculateAdd = () => {
@@ -229,6 +297,9 @@ const handlerChange = () => {
 }
 
     formAdd.addEventListener("change", handlerChange);
+    formControl(formAdd, () => {
+      modalAdd.closest("close");
+    })
 
 const fillInForm = (data) => {
   
@@ -262,12 +333,13 @@ formAdd.reset();
       // time: 500 скорость открытия модального окна
     });
 
-    calculateMakeYourOwn ();
+    const { resetForm: resetFormMakeYourOwn  } = calculateMakeYourOwn ();
 
     modalController({
       modal: ".modal__make-your-own",
       btnOpen: ".cocktail__btn-make",
-});
+      close: resetFormMakeYourOwn,
+    });
 
     // modalController({
     //     modal: ".modal__make",
@@ -299,7 +371,7 @@ headerBtnOrder.addEventListener("click", () => {  далее мы должны �
     goodsListEitem.append(...cartsCocktail);
 
 
-    const { fillInForm, resetForm } = calculateAdd();
+    const { fillInForm: fillInFormAdd, resetForm: resetFormAdd } = calculateAdd();
 
     modalController({
       modal: ".modal__add",
@@ -309,10 +381,10 @@ headerBtnOrder.addEventListener("click", () => {  далее мы должны �
       open({ btn }) {
         const id = btn.dataset.id;
         const item = data.find((item) => item.id.toString() === id);
-        fillInForm(item);
+        fillInFormAdd(item);
       },
 
-      close: resetForm,
+      close: resetFormAdd,
     });
   };
 
