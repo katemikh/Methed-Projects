@@ -244,7 +244,7 @@ const calculateMakeYourOwn = () => {
         ? data.ingredients.join(", ")
         : data.ingredients;
 
-      makeInputTitle.value = "Конструктор: ${ingredients}";
+      makeInputTitle.value = `Конструктор: ${ingredients}`;
       makeAddBtn.disabled = false;
     } else {
       makeAddBtn.disabled = true;
@@ -271,7 +271,7 @@ const calculateMakeYourOwn = () => {
     makeTitle.textContent = "";
     makeTotalPrice.textContent = "";
     makeAddBtn.disabled = true;
-    formAdd.reset();
+    modalMakeOwn.reset();
   }
 
   return {resetForm};
@@ -282,7 +282,7 @@ const calculateAdd = () => {
     const formAdd = document.querySelector(".make__form-add");
 
     const makeTitle = modalAdd.querySelector(".make__title");
-    const makeInputTitel = modalAdd.querySelector(".make__input-title");
+    const makeInputTitle = modalAdd.querySelector(".make__input-title");
     const makeTotalPrice = modalAdd.querySelector(".make__total-price");
     const makeInputStartPrice = modalAdd.querySelector(".make__input-start-price");
     const makeInputPrice = modalAdd.querySelector(".make__input-price");
@@ -294,17 +294,17 @@ const handlerChange = () => {
   
   makeInputPrice.value = totalPrice;
   makeTotalPrice.textContent = `${totalPrice} ₽`;
-}
+};
 
     formAdd.addEventListener("change", handlerChange);
     formControl(formAdd, () => {
-      modalAdd.closest("close");
-    })
+      modalAdd.closeModal("close");
+    });
 
 const fillInForm = (data) => {
   
 makeTitle.textContent = data.title
-makeInputTitel.value = data.title
+makeInputTitle.value = data.title
 makeTotalPrice.textContent = `${data.price} ₽`;
 makeInputStartPrice.value = data.price;
 makeInputPrice.value = data.price;
@@ -314,9 +314,9 @@ handlerChange();
 };
 
 const resetForm = () => {
-makeTitle.textContent = "";
-makeTotalPrice.textContent = "";
-makeTotalSize.textContent =  "";
+makeTitle.textContent = " ";
+makeTotalPrice.textContent = " ";
+makeTotalSize.textContent =  " ";
 
 formAdd.reset();
 };
@@ -326,11 +326,100 @@ formAdd.reset();
   return { fillInForm, resetForm };
 };
 
+const createCartItem = (item) => {
+  const li  = document.createElement("li");
+  li.classList.add("order__item");
+
+  li.innerHTML = `
+  <img class="order__img" src="./img/banana.png" alt="${item.title}"/>
+
+      <div class="order__info">
+          <h3 class="order__name">${item.title}</h3>
+
+              <ul class="order__topping-list">
+                  <li class="order__topping-item">${item.size}</li>
+                  <li class="order__topping-item">${item.cup}</li>
+                   ${
+                    item.topping 
+                    ? (Array.isArray(item.topping)
+                      ? item.topping.map(
+                        (topping) => `<li class="order__topping-item">${topping}</li>`, 
+                        )
+                  : `<li class="order__topping-item">${item.topping}</li>`)
+                  : ""
+                }
+                  
+              </ul>
+      </div>
+
+      <button class="order__item-delete" data-idls="${item.idls}"
+      aria-label="удалить коктейль из корзины"></button>
+
+      <p class="order__item-price">${item.price}&nbsp;₽</p>
+  `;
+
+  return li;
+}
+
+
+const renderCart = () => {
+  // эта функция будет получать модальное окно modal: ".modal__order",
+  const modalOrder = document.querySelector(".modal__order");
+  const orderCount = modalOrder.querySelector(".order__count");
+  const orderList = modalOrder.querySelector(".order__list");
+  const orderTotalPrice = modalOrder.querySelector(".order__total-price");
+  const orderForm = modalOrder.querySelector(".order__form");
+
+  const orderListData = cartDataControl.get();
+
+  orderList.textContent = " ";
+  orderCount.textContent = `(${orderListData.length})`;
+
+  orderListData.forEach(item => {
+    orderList.append(createCartItem(item));
+  });
+
+  orderTotalPrice.textContent = 
+  `${orderListData.reduce((acc, item) => acc + +item.price,0)} ₽ `;
+
+  orderForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    if (!orderListData.length) {
+      alert("Корзина пустая");
+       orderForm.reset();
+       modalOrder.closeModal("close");
+      return;
+    }
+
+    const data = getFormData(orderForm);
+    const response = await fetch('${API_URL}api/order', {
+      method: "POST",
+      body: JSON.stringify({
+        ...data,
+        products: orderListData,
+      }),
+      headers: {
+        "Content-Type": 'application/json'
+      }
+    });
+
+    const {message} = await response.json();
+
+    alert (message);
+
+    cartDataControl.clear();
+    orderForm.reset();
+    modalOrder.closeModal("close");
+    
+  });
+};
+
   const init = async () => {
     modalController({
       modal: ".modal__order",
       btnOpen: ".header__btn-order",
       // time: 500 скорость открытия модального окна
+      open: renderCart,
     });
 
     const { resetForm: resetFormMakeYourOwn  } = calculateMakeYourOwn ();

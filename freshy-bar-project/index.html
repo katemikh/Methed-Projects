@@ -210,7 +210,7 @@
                     <h2 class="order__title">Корзина<sup class="text__red order__count">(2)</sup></h2>
 
                     <ul class="order__list">
-                        <li class="order__item">
+                        <!-- <li class="order__item">
                             <img class="order__img" src="./img/make-your-own.jpg" alt="cocktail name" />
 
                             <div class="order__info">
@@ -240,7 +240,8 @@
                             <button class="order__item-delete" aria-label="удалить коктейль из корзины"></button>
 
                             <p class="order__item-price">520 ₽</p>
-                        </li>
+                        </li> -->
+                    </ul>
 
                         <div class="order__price">
                             <p class="order__price-title">Итого</p>
@@ -249,16 +250,15 @@
 
                         <form class="order__form">
                             <label class="order__label">
-                                <input class="order__input" type="text" placeholder="Ваше имя" />
+                                <input class="order__input" type="text" required name="name" placeholder="Ваше имя" />
                             </label>
 
                             <label class="order__label">
-                                <input class="order__input" type="text" placeholder="Телефон" />
+                                <input class="order__input" type="text" required name="phone" placeholder="Телефон" />
                             </label>
 
                             <button class="order__submit btn">Заказать</button>
                         </form>
-                    </ul>
                 </div>
             </div>
         </div>
