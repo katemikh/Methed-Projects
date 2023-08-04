@@ -262,16 +262,16 @@ const calculateMakeYourOwn = () => {
     makeTotalPrice.textContent = `${totalPrice} ₽`;  */
   
   formControl(formMakeOwn, () => {
-    modalMakeOwn.closeModal(close);
+    modalMakeOwn.closeModal("close");
   });
   handlerChange();
   // });
 
   const resetForm = () => {
-    makeTitle.textContent = "";
+    // makeTitle.textContent = "";
     makeTotalPrice.textContent = "";
     makeAddBtn.disabled = true;
-    modalMakeOwn.reset();
+    formMakeOwn.reset();
   }
 
   return {resetForm};
@@ -314,9 +314,9 @@ handlerChange();
 };
 
 const resetForm = () => {
-makeTitle.textContent = " ";
-makeTotalPrice.textContent = " ";
-makeTotalSize.textContent =  " ";
+makeTitle.textContent = "";
+makeTotalPrice.textContent = "";
+makeTotalSize.textContent =  "";
 
 formAdd.reset();
 };
@@ -327,7 +327,7 @@ formAdd.reset();
 };
 
 const createCartItem = (item) => {
-  const li  = document.createElement("li");
+  const li  = document.createElement('li');
   li.classList.add("order__item");
 
   li.innerHTML = `
@@ -346,7 +346,7 @@ const createCartItem = (item) => {
                         (topping) => `<li class="order__topping-item">${topping}</li>`, 
                         )
                   : `<li class="order__topping-item">${item.topping}</li>`)
-                  : ""
+                  : ''
                 }
                   
               </ul>
@@ -372,17 +372,17 @@ const renderCart = () => {
 
   const orderListData = cartDataControl.get();
 
-  orderList.textContent = " ";
+  orderList.textContent = "";
   orderCount.textContent = `(${orderListData.length})`;
 
   orderListData.forEach(item => {
     orderList.append(createCartItem(item));
   });
 
-  orderTotalPrice.textContent = 
-  `${orderListData.reduce((acc, item) => acc + +item.price,0)} ₽ `;
+  orderTotalPrice.textContent = `${orderListData.reduce(
+    (acc, item) => acc + +item.price, 0,)} ₽`;
 
-  orderForm.addEventListener("submit", async (e) => {
+  orderForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     if (!orderListData.length) {
       alert("Корзина пустая");
@@ -392,8 +392,8 @@ const renderCart = () => {
     }
 
     const data = getFormData(orderForm);
-    const response = await fetch('${API_URL}api/order', {
-      method: "POST",
+    const response = await fetch(`${API_URL}api/order`, {
+      method: 'POST',
       body: JSON.stringify({
         ...data,
         products: orderListData,
@@ -404,12 +404,11 @@ const renderCart = () => {
     });
 
     const {message} = await response.json();
-
     alert (message);
 
     cartDataControl.clear();
-    orderForm.reset();
-    modalOrder.closeModal("close");
+    // orderForm.reset();
+    // modalOrder.closeModal("close");
     
   });
 };
